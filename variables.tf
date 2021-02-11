@@ -9,7 +9,7 @@ variable "public_key" {
 }
 
 variable "instance_name" {
-  description = "Value for the Name tag on the created EC2 instance. If none provided, will default to random pet name"
+  description = "Value for the Name tag on the created EC2 instance. If none provided, will take default name"
   type        = string
   default     = "Test-Instance"
 }
@@ -32,8 +32,4 @@ variable "environment" {
 variable "cidr" {
     type = list
     default = [ "0.0.0.0/0" ]
-}
-
-variable "ubuntu_account_number" {
-  default = "099720109477"
 }
