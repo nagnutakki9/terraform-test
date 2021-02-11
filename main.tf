@@ -11,7 +11,7 @@ data "aws_vpc" "default" {
 data "aws_subnet" "default" {
   vpc_id            = data.aws_vpc.default.id
   default_for_az    = true
-  availability_zone = "${var.region}a"
+  availability_zone = "${var.region}"
 }
 
 //  A keypair for SSH access to the instances.
@@ -21,7 +21,7 @@ resource "aws_key_pair" "keypair" {
 }
 
 resource "aws_s3_bucket" "bucket" {
-  bucket = "test-bucket-naga"
+  bucket = "nag-test"
   acl    = "private"
 }
 
