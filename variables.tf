@@ -29,7 +29,7 @@ variable "environment" {
 }
 
 
-variable "ssh_permit" {
+variable "cidr" {
     type = list
     default = [ "0.0.0.0/0" ]
 }
