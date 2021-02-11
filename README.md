@@ -1,4 +1,4 @@
-### Terraform-Test
+# Terraform-Test
 Test repo for Fox interivew question
 
 ## Requirements
