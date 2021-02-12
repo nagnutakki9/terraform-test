@@ -26,7 +26,9 @@ Create a README.md and document all assumptions you’ve made. Login to the EC2 
 * run `terraform apply`
 
 
-|Name|Version|
+## Requirements
 
-|terraform	>= 0.12.21|
-|aws	>= 3.10|
+| Name | Version |
+|------|---------|
+| terraform | >= 0.12.21 |
+| aws | >= 3.10 |
