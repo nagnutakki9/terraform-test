@@ -32,3 +32,17 @@ Create a README.md and document all assumptions you’ve made. Login to the EC2 
 |------|---------|
 | terraform | >= 0.12.21 |
 | aws | >= 3.10 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| aws | >= 3.10 |
+
+ Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| public_key|The local public key path.|string |`true` | yes |
+| instance_name|Value for the Name tag on the created EC2 instance|string |`true` | yes |
+| instance_name|Value for the Name tag on the created EC2 instance|string |`true` | yes |
