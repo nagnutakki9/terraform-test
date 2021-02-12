@@ -46,3 +46,11 @@ Create a README.md and document all assumptions you’ve made. Login to the EC2 
 | public_key|The local public key path.|string |`true` | yes |
 | instance_name|Value for the Name tag on the created EC2 instance|string |`true` | yes |
 
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| public_ip | aws instance public ip |
+| s3-role | IAM Role of s3 bucket|
+
