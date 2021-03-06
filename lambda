@@ -1,0 +1,180 @@
+"""Python Lambda to create Service Endpoints."""
+
+import json
+import os
+import urllib3
+import datetime
+import boto3
+
+urllib3.disable_warnings()
+REGION_NAME = os.environ['AWS_REGION']
+SERVICE_NAME = 'com.amazonaws.{0}.kinesis-streams'.format(REGION_NAME)
+
+
+def default(datetime_format):
+    """Format datestring to provide default for datetime format."""
+    if isinstance(datetime_format, (datetime.date, datetime.datetime)):
+        return datetime_format.isoformat()
+    return None
+
+
+def create_service_endpoints():
+    """Check and create Service Endpoints."""
+    subnets = get_subnets()
+    ec2_client = get_client()
+
+for subnet in subnets:
+        # Get VPCId of Subnet
+        response = get_vpcid(ec2_client, subnet)
+
+        vpc_id = response['Subnets'][0]['VpcId']
+        print('vpc_id is {0}'.format(vpc_id))
+
+        response = get_endpoints(ec2_client, vpc_id)
+        print(json.dumps(response, indent=4, default=default))
+        endpoint_id = \
+            get_endpoint_id(response, subnet)
+
+# Create VPC Service Endpoint if it do not exists
+        if endpoint_id is not None:
+            print('Kinesis Service endpoint {0} exists'.format(endpoint_id) +
+                  'for subnet {0}. Skip..'.format(subnet))
+        else:
+            print('Kinests Service Endpoint not found in ' +
+                  ' subnet {0}. Creating now'.format(subnet))
+
+            response = ec2_client.create_vpc_endpoint(
+                DryRun=False,
+                VpcEndpointType='Interface',
+                VpcId=vpc_id,
+                ServiceName=SERVICE_NAME,
+                SubnetIds=[
+                    subnet
+                ],
+                PrivateDnsEnabled=False
+            )
+            print(json.dumps(response, indent=4, default=default))
+
+
+def get_subnets():
+    """Get subnets."""
+    return os.environ['SUBNETS'].split(',')
+
+
+def get_client():
+    """Get client."""
+    return boto3.client('ec2', region_name=REGION_NAME)
+
+
+def get_endpoint_id(response, subnet):
+    """Get Endpoint_id."""
+    endpoint_id = None
+
+    for endpoint in response['VpcEndpoints']:
+        if subnet in endpoint['SubnetIds']:
+            endpoint_id = endpoint['VpcEndpointId']
+
+    return endpoint_id
+
+
+def get_endpoints(ec2_client, vpc_id):
+    """Get Service Endpoints."""
+    # Get All Endpoints in VPC/Subnet
+    response = ec2_client.describe_vpc_endpoints(
+        DryRun=False,
+        Filters=[
+            {
+                'Name': 'service-name',
+                'Values': [SERVICE_NAME]
+            },
+            {
+                'Name': 'vpc-id',
+                'Values': [vpc_id]
+            }
+        ]
+    )
+
+    return response
+
+
+def delete_service_endpoints():
+    """Check and delete Service Endpoints."""
+    subnets = get_subnets()
+    ec2_client = get_client()
+
+for subnet in subnets:
+        # Get VPCId of Subnet
+        response = get_vpcid(ec2_client, subnet)
+
+        vpc_id = response['Subnets'][0]['VpcId']
+        print('vpc_id is {0}'.format(vpc_id))
+
+        # Get All Endpoints in VPC/Subnet
+        response = get_endpoints(ec2_client, vpc_id)
+        print(json.dumps(response, indent=4, default=default))
+
+        endpoint_id = None
+
+if len(response['VpcEndpoints']) == 1:
+            endpoint_id = get_endpoint_id(response, subnet)
+        # Delete VPC Service Endpoint if exists
+        if endpoint_id is not None:
+            print('Kinests Service Endpoint found in ' +
+                  ' subnet {0}. Deleting now'.format(subnet))
+            response = ec2_client.delete_vpc_endpoints(
+                VpcEndpointIds=[
+                    endpoint_id
+                ]
+            )
+            print(json.dumps(response, indent=4, default=default))
+else:
+            print('Kinesis Service endpoint do not exists' +
+                  ' or exists more than one for subnet ' +
+                  '{0}. Skip..'.format(subnet))
+
+
+def get_vpcid(ec2_client, subnet):
+    """Check Service Endpoints."""
+    return ec2_client.describe_subnets(
+        SubnetIds=[
+            subnet,
+        ]
+    )
+
+
+def lambda_handler(event, context):
+    """Lambda Handler function."""
+    print("Lambda to check Kinesis VPC Service Endpoints")
+    print(event)
+
+try:
+        current_account_id = boto3.client('sts', verify=False)\
+            .get_caller_identity().get('Account')
+        event_principal_id = \
+            event['detail']['userIdentity']['principalId']
+
+        if current_account_id != event_principal_id:
+            print('User initiated request. Proceed to ' +
+                  'check/create service account')
+            if event['detail']['eventName'] == 'CreateStream':
+                create_service_endpoints()
+            elif event['detail']['eventName'] == 'DeleteStream':
+                delete_service_endpoints()
+            else:
+                pass
+else:
+            print('The request is not user initiated. Do not proceed')
+            return {
+                'statusCode': 200,
+                'message': 'The request is not user initiated. Do not proceed'
+            }
+    except ValueError as e_value_error:
+        print(e_value_error)
+        return {
+            'statusCode': 200,
+            'message': 'Error Massage: ' + e_value_error
+        }
+    return {
+        'statusCode': 200,
+        'message': 'The Endpoints deletion are completed'
+    }
