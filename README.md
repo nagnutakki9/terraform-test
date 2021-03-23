@@ -52,3 +52,26 @@ Create the following resources using Terraform:
 | public_ip | aws instance public ip |
 | s3-role | IAM Role of s3 bucket|
 
+
+
+Join on your computer or mobile app
+
+Click here to join the meeting
+
+Join with a video conferencing device
+
+RSI@teams.bjn.vc
+
+Video Conference ID: 117 699 296 6 
+
+Alternate VTC dialing instructions
+
+Or call in (audio only)
+
++1 480-757-7945,,635803772#   United States, Phoenix 
+
+Phone Conference ID: 635 803 772# 
+
+Find a local number | Reset PIN
+
+Learn More | Meeting options
