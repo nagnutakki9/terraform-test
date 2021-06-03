@@ -1,0 +1,24 @@
+from nslookup import Nslookup
+from pythonping import ping
+
+DNS_SERVERS = ['8.8.8.8']
+ONPREM_HOSTS_LIST = 'prodgitlab.usaa.com,myhome.usaa.com,wiki.usaa.com'
+ONPREM_HOSTS = ONPREM_HOSTS_LIST.split(',')
+
+def test_host(hostname):
+    dns_query = Nslookup(dns_servers=DNS_SERVERS)
+    ips_record = dns_query.dns_lookup(hostname)
+    # print(ips_record.response_full, ips_record.answer)
+    if ips_record.answer:
+        return True
+    return False
+
+
+for host in ONPREM_HOSTS:
+    print('Testing host:' + host)
+    test_result = test_host(host)
+    if test_result is True:
+        print('    DNS Resolved OK: ' + host)
+        ping(host, verbose=True, count=1)
+    else:
+        print('    DNS Resolved FAILED: ' + host)
